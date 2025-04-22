@@ -12,7 +12,7 @@ def get_requirements(file):
     return requirements
 
 setup(
-    name='footballanalytics',  # Fixed typo
+    name='salesforecasting',  # Fixed typo
     version='0.0.1',
     author='Maaz Ahmad',
     packages=find_packages(),

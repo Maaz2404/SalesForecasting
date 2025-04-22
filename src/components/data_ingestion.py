@@ -50,12 +50,21 @@ class DataIngestion:
     def read_data(self):
         logging.info("Reading data")
         try:
-           calendar_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'calendar.csv')
-           sales_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'sales_train_validation.csv')
-           prices_file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'sell_prices.csv') 
+           calendar_file_path = os.path.join('src', 'data', 'calendar.csv')
+           sales_file_path = os.path.join('src', 'data', 'sales_train_validation.csv')
+           prices_file_path = os.path.join('src', 'data', 'sell_prices.csv')
+
+
            calendar = pd.read_csv(calendar_file_path) 
-           sales = pd.read_csv(sales_file_path,nrows=1000) 
+           sales = pd.read_csv(sales_file_path) 
            sell_prices = pd.read_csv(prices_file_path)
+           sales = sales[sales['dept_id'] == 'FOODS_1']
+           
+           day_cols = [col for col in sales.columns if col.startswith('d_')]
+           day_cols_2yrs = day_cols[:730]
+           id_cols = ['id', 'item_id', 'dept_id', 'cat_id', 'store_id', 'state_id']
+           sales = sales[id_cols + day_cols_2yrs]
+           
            logging.info("Data read successfully")
            data = self.__merge_data(calendar, sales, sell_prices)
            os.makedirs(os.path.dirname(self.config.train_path), exist_ok=True)

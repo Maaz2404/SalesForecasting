@@ -3,4 +3,6 @@ matplotlib
 numpy
 bs4
 requests
+scikit-learn
+
 #-e .
