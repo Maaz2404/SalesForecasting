@@ -16,14 +16,16 @@ def load_object(file_path):
 
     Returns:
         object: The loaded Python object.
+
+    Raises:
+        CustomException: If there is an error during loading.
     """
     try:
         with open(file_path, 'rb') as file:
             obj = dill.load(file)
         return obj
     except Exception as e:
-        print(f"Error loading object from {file_path}: {e}")
-        return None
+        raise CustomException(f"Error loading object from {file_path}: {e}", sys)
 
 def save_object(file_path, obj):
     """
@@ -35,14 +37,17 @@ def save_object(file_path, obj):
 
     Returns:
         None
+
+    Raises:
+        CustomException: If there is an error during saving.
     """
     try:
         dir_path = os.path.dirname(file_path)
-        os.makedirs(dir_path,exist_ok=True)        
+        os.makedirs(dir_path, exist_ok=True)
         with open(file_path, 'wb') as file:
             dill.dump(obj, file)
     except Exception as e:
-        print(f"Error saving object to {file_path}: {e}")
+        raise CustomException(f"Error saving object to {file_path}: {e}", sys)
     
 def evaluate_models(x_train, y_train, x_test, y_test, models):
     """
