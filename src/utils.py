@@ -1,11 +1,16 @@
 import dill
-import pickle
+import numpy as np
 from sklearn.metrics import r2_score,mean_squared_error
 from src.logger import logging
 from src.exception import CustomException
-import numpy as np
+import pandas as pd
 import sys
 import os
+
+def get_last_known_info(file_path):
+    df = pd.read_csv(file_path)
+    
+    
 
 def load_object(file_path):
     """

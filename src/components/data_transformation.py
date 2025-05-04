@@ -17,6 +17,7 @@ class DataTransformationConfig:
 class DataTransformation:
     def __init__(self):
         self.data_transformation_config = DataTransformationConfig()
+        self.start_date = None  # <-- NEW: Store the earliest date for global days_since_start
 
     def _aggregate(self, df):
         try:
@@ -52,16 +53,14 @@ class DataTransformation:
             df['month'] = df.index.get_level_values(0).month
             df['is_weekend'] = df['dayofweek'].apply(lambda x: 1 if x >= 5 else 0)
             df['is_weekend'] = df['is_weekend'].astype('int')
-            df['days_since_start'] = (df.index.get_level_values(0) - df.index.get_level_values(0)[0]).days.astype('int')
-
-            # Fixing lag and rolling features to be per-store
-            df['lag_1'] = df.groupby('store_id')['sales'].shift(1).fillna(0)
-            df['lag_7'] = df.groupby('store_id')['sales'].shift(7).fillna(0)
-            df['lag_14'] = df.groupby('store_id')['sales'].shift(14).fillna(0)
             
+            # ✅ FIX: Use global start_date instead of local 0th index
+            df['days_since_start'] = (df.index.get_level_values(0) - self.start_date).days.astype('int')
 
+            df['lag_1'] = df.groupby('store_id')['sales'].shift(1).fillna(method='bfill')
+            df['lag_7'] = df.groupby('store_id')['sales'].shift(7).fillna(method='bfill')
+            df['lag_14'] = df.groupby('store_id')['sales'].shift(14).fillna(method='bfill')
 
-            # OneHotEncode store_id
             encoder = OneHotEncoder(sparse_output=False, drop='first')
             agg_encoded = encoder.fit_transform(df[['store_id']])
             df[encoder.get_feature_names_out(['store_id'])] = agg_encoded
@@ -79,6 +78,9 @@ class DataTransformation:
             raw_data = pd.read_csv(self.data_transformation_config.train_path)
 
             aggregated_data = self._aggregate(raw_data)
+            
+            # ✅ SET GLOBAL START DATE
+            self.start_date = aggregated_data.index.min()
 
             min_date = aggregated_data.index.min()
             max_date = aggregated_data.index.max()
@@ -105,8 +107,8 @@ class DataTransformation:
 
             X_train.to_csv(X_train_path, index=False)
             X_test.to_csv(X_test_path, index=False)
-            y_train.to_csv(y_train_path, index=False, header=['sales'])
-            y_test.to_csv(y_test_path, index=False, header=['sales'])
+            y_train.to_csv(y_train_path, header=['sales'], index=False)
+            y_test.to_csv(y_test_path, header=['sales'], index=False)
 
             logging.info("Data transformation completed and files saved")
             return (X_train_path, X_test_path, y_train_path, y_test_path)
