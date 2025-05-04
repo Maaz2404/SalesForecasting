@@ -10,7 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["http://localhost:5173"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class IncomingData(BaseModel):
     sell_price:float
     store_id:str
@@ -28,12 +34,19 @@ def forecast_sales(incoming: dict) -> List[float]:
 
     last_date = pd.to_datetime('2013-01-27')
     initial_days_since_start = df['days_since_start'].iloc[0]
-
-    store_col = f"store_id_{incoming['store_id']}"
-    if store_col not in df.columns:
-        raise ValueError(f"Invalid store_id: {incoming['store_id']}")
-
-    historical_sales = df[df[store_col] == 1].copy()
+    
+    if incoming['store_id'] == "CA_1":
+       # For CA_1, all store columns should be 0
+        store_columns = [col for col in df.columns if col.startswith('store_id_')]
+        # Filter rows where all store columns are 0
+        historical_sales = df[(df[store_columns] == 0).all(axis=1)].copy()
+            
+    else:     
+        store_col = f"store_id_{incoming['store_id']}"
+        if store_col not in df.columns:
+            raise ValueError(f"Invalid store_id: {incoming['store_id']}")
+        historical_sales = df[df[store_col] == 1].copy()
+    
     sales = sales.loc[historical_sales.index].squeeze()
     past_sales = list(sales[-14:].values)
 
