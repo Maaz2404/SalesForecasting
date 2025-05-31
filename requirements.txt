@@ -7,4 +7,5 @@ dill
 scikit-learn
 fastapi
 pydantic
+uvicorn
 #-e .
