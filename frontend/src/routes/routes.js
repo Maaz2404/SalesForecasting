@@ -1,5 +1,5 @@
 import axios from 'axios'
-const baseURL =  'http://127.0.0.1:8000';
+const baseURL =  'https://sales-forecasting-web-app.onrender.com';
 const predict = (newObject) => {
   return axios.post(`${baseURL}/predict`, newObject).then(res => res.data);
 };
