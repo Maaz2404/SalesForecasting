@@ -175,5 +175,4 @@ cython_debug/
 
 data/
 notebooks/requirements.txt
-artifact/
 logs/

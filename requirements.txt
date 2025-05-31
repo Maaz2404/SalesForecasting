@@ -6,4 +6,7 @@ requests
 dill
 scikit-learn
 fastapi
+pydantic
+pickle
+
 #-e .
